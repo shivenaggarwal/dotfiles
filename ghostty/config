@@ -1,0 +1,24 @@
+title = " "
+cursor-style-blink = false
+shell-integration-features = no-cursor
+window-decoration = true
+macos-non-native-fullscreen = true
+cursor-style = block
+
+theme = catppuccin-mocha
+font-family = 0xProto Nerd Font Mono
+font-size = 16
+font-thicken = true
+
+# new window panes
+keybind = ctrl+s>l=new_split:right
+keybind = ctrl+s>h=new_split:left
+keybind = ctrl+s>k=new_split:up
+keybind = ctrl+s>j=new_split:down
+
+# moving between panes
+keybind = ctrl+s>p=goto_split:previous
+keybind = ctrl+s>n=goto_split:next
+
+# closing surfaces
+keybind = ctrl+s>d=close_window
