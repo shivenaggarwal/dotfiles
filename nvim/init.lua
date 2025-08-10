@@ -9,7 +9,7 @@ local g = vim.g -- alias for vim.g
 
 opt.number = true -- numbers in the left column
 opt.relativenumber = true -- relative numbers on by default
-opt.mouse = "a"  -- enable mouse support in all modes
+opt.mouse = "a" -- enable mouse support in all modes
 opt.ignorecase = true -- ignore case when searching
 opt.smartcase = true -- ignore case if search pattern is all lowercase
 opt.gdefault = true -- replace all matches in a line by default
@@ -31,7 +31,8 @@ opt.backup = false -- do not create backup files
 opt.writebackup = false -- do not create backup files
 opt.foldmethod = "expr" -- folding method expression
 opt.foldexpr = "nvim_treesitter#foldexpr()" -- folding method for treesitter
-opt.foldlevel = 99 -- folding level to open all folds by default 
+opt.foldlevel = 99 -- folding level to open all folds by default
+--opt.showtabline = 2 -- set the top bar in your UI
 -- }}}
 -- ========================================================================== --
 -- ==           {{{   KEY BINDINGS                                         == --
@@ -44,12 +45,11 @@ key("i", "jk", "<esc>", { desc = "Go to Normal Mode" }) -- go to normal mode
 key("n", "q", "<C-r>", { desc = "Redo" }) -- redo
 key("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle File Explorer" }) --nvim tree
 
-
 key({ "n", "x", "o" }, "<leader>h", "^", { desc = "Move to beginning of line" }) -- move to beginning of line
 key({ "n", "x", "o" }, "<leader>l", "g_", { desc = "Move to end of line" }) -- move to end of line
 key("n", "<leader>a", ":keepjumps normal! ggVG<cr>", { desc = "Select all" }) -- select all
 
-key("n", "<leader>nn", ":set nonumber!<CR>", { desc =  "Toggle line numbers" }) -- toggle line numbers
+key("n", "<leader>nn", ":set nonumber!<CR>", { desc = "Toggle line numbers" }) -- toggle line numbers
 key("n", "<leader>nr", ":set relativenumber!<CR>", { desc = "Toggle relative line numbers" }) -- toggle relative line numbers
 key("n", "<leader>w", ":set wrap! wrap?<CR>", { desc = "Toggle line wrap" }) -- toggle line wrap
 
@@ -67,12 +67,12 @@ key("n", "<leader>ca", ":lua vim.lsp.buf.code_action()<CR>", { desc = "Code Acti
 
 api.nvim_create_user_command("ReloadConfig", "source $MYVIMRC", {}) -- reload config
 
-local group = api.nvim_create_augroup("user_cmds", { clear = true }) -- augroup for user commands 
+local group = api.nvim_create_augroup("user_cmds", { clear = true }) -- augroup for user commands
 
 api.nvim_create_autocmd("TextYankPost", { -- highlight on yank
-	desc = "Highlight on yank", 
-	group = group, 
-	callback = function() 
+	desc = "Highlight on yank",
+	group = group,
+	callback = function()
 		vim.highlight.on_yank({ higroup = "Visual", timeout = 200 })
 	end,
 })
@@ -83,13 +83,12 @@ api.nvim_create_autocmd("FileType", { -- quit help buffers
 	command = "nnoremap <buffer> q <cmd>quit<cr>",
 })
 
-api.nvim_set_keymap('c', '<Down>', 'v:lua.get_wildmenu_key("<right>", "<down>")', { expr = true }) -- cusror down in wildmenu
-api.nvim_set_keymap('c', '<Up>', 'v:lua.get_wildmenu_key("<left>", "<up>")', { expr = true }) -- cusror up in wildmenu
+api.nvim_set_keymap("c", "<Down>", 'v:lua.get_wildmenu_key("<right>", "<down>")', { expr = true }) -- cusror down in wildmenu
+api.nvim_set_keymap("c", "<Up>", 'v:lua.get_wildmenu_key("<left>", "<up>")', { expr = true }) -- cusror up in wildmenu
 
 function _G.get_wildmenu_key(key_wildmenu, key_regular)
-return vim.fn.wildmenumode() ~= 0 and key_wildmenu or key_regular
+	return vim.fn.wildmenumode() ~= 0 and key_wildmenu or key_regular
 end
-
 
 -- }}}
 -- ========================================================================== --
@@ -99,17 +98,17 @@ end
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
-      { "\nPress any key to exit..." },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
+	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+	if vim.v.shell_error ~= 0 then
+		vim.api.nvim_echo({
+			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+			{ out, "WarningMsg" },
+			{ "\nPress any key to exit..." },
+		}, true, {})
+		vim.fn.getchar()
+		os.exit(1)
+	end
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -121,182 +120,196 @@ vim.g.maplocalleader = "\\"
 
 -- Setup lazy.nvim
 require("lazy").setup({
-  spec = {
-{
-  "nvim-tree/nvim-tree.lua",
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
-  },
-  config = function()
-    require("nvim-tree").setup({
-      view = {
-        width = 35,
-        side = "left",
-      },
-      renderer = {
-        group_empty = true,
-        highlight_git = true,
-        icons = {
-          show = {
-            git = true,
-            folder = true,
-            file = true,
-            folder_arrow = true,
-          },
-        },
-      },
-      git = {
-        enable = true,
-      },
-    })
-  end,
-},
+	spec = {
 
 		{
-  "goolord/alpha-nvim",
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
-  },
-
-  config = function()
-    local alpha = require("alpha")
-    local dashboard = require("alpha.themes.dashboard")
-
-    dashboard.section.header.val = {
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                     ]],
-      [[       ████ ██████           █████      ██                     ]],
-      [[      ███████████             █████                             ]],
-      [[      █████████ ███████████████████ ███   ███████████   ]],
-      [[     █████████  ███    █████████████ █████ ██████████████   ]],
-      [[    █████████ ██████████ █████████ █████ █████ ████ █████   ]],
-      [[  ███████████ ███    ███ █████████ █████ █████ ████ █████  ]],
-      [[ ██████  █████████████████████ ████ █████ █████ ████ ██████ ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-      [[                                                                       ]],
-    }
-
-    -- Apply highlight to the header
-    dashboard.section.header.opts = {
-      position = "center",
-      hl = "DashboardHeader",
-    }
-
-    -- Choose highlight color here:
-    -- Solarized Light *recommendation*: use the "blue" or "base0" tone
-    -- (Solarized Light has #268bd2 for blue)
-    vim.api.nvim_set_hl(0, "DashboardHeader", { link = "Title" })
-
-		dashboard.section.buttons.val = {
-    dashboard.button("f", "  Find File", "<cmd>Telescope find_files<CR>"),
-    dashboard.button("n", "  New File", "<cmd>enew<CR>"),
-    dashboard.button("g", "  Find Text", "<cmd>Telescope live_grep<CR>"),
-    dashboard.button("r", "  Recent Files", "<cmd>Telescope oldfiles<CR>"),
-    dashboard.button("c", "  Config", "<cmd>edit $MYVIMRC<CR>"),
-    dashboard.button("L", "  Lazy", "<cmd>Lazy<CR>"),
-    dashboard.button("q", "  Quit", "<cmd>qa<CR>"),
-  }
-	
-    -- Footer can remain empty
-    dashboard.section.footer.val = ""
-
-    -- Allow autocommands so theme highlights apply properly
-    dashboard.opts.opts.noautocmd = false
-
-    alpha.setup(dashboard.opts)
-
-    -- Ensure colorscheme autocommands run after Alpha is ready
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "AlphaReady",
-      callback = function()
-        vim.cmd("doautocmd ColorScheme")
-      end,
-    })
-  end,
-},
-
-    	-- Theming
-	{ "folke/tokyonight.nvim" }, -- colorscheme 
-	{ "nyoom-engineering/oxocarbon.nvim" },
-	{ "ishan9299/nvim-solarized-lua" },
-	-- { "bluz71/nvim-linefly" }, -- statusline plugin
-	{ "nvim-lualine/lualine.nvim" },
-	{
-		"echasnovski/mini.indentscope", -- indent guides 
-		version = false, -- wait till new 0.7.0 release to put it back on semver
-		event = { "BufReadPre", "BufNewFile" },
-		opts = {
-			-- symbol = "▏",
-			symbol = "│",
-			options = { try_as_border = true },
+			"ThePrimeagen/vim-be-good",
 		},
-		init = function()
-			api.nvim_create_autocmd("FileType", {
-				pattern = {
-					"help",
-					"dashboard",
-					"lazy",
-					"mason",
-					"notify",
-				},
-				callback = function()
-					vim.b.miniindentscope_disable = true
+
+		{
+			"nvim-tree/nvim-tree.lua",
+			dependencies = {
+				"nvim-tree/nvim-web-devicons",
+			},
+			config = function()
+				require("nvim-tree").setup({
+					view = {
+						width = 35,
+						side = "left",
+					},
+					renderer = {
+						group_empty = true,
+						highlight_git = true,
+						icons = {
+							show = {
+								git = true,
+								folder = true,
+								file = true,
+								folder_arrow = true,
+							},
+						},
+					},
+					git = {
+						enable = true,
+					},
+				})
+			end,
+		},
+
+		{
+			"goolord/alpha-nvim",
+			dependencies = {
+				"nvim-tree/nvim-web-devicons",
+			},
+
+			config = function()
+				local alpha = require("alpha")
+				local dashboard = require("alpha.themes.dashboard")
+
+				dashboard.section.header.val = {
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                     ]],
+					[[       ████ ██████           █████      ██                     ]],
+					[[      ███████████             █████                             ]],
+					[[      █████████ ███████████████████ ███   ███████████   ]],
+					[[     █████████  ███    █████████████ █████ ██████████████   ]],
+					[[    █████████ ██████████ █████████ █████ █████ ████ █████   ]],
+					[[  ███████████ ███    ███ █████████ █████ █████ ████ █████  ]],
+					[[ ██████  █████████████████████ ████ █████ █████ ████ ██████ ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+					[[                                                                       ]],
+				}
+
+				-- Apply highlight to the header
+				dashboard.section.header.opts = {
+					position = "center",
+					hl = "DashboardHeader",
+				}
+
+				-- Choose highlight color here:
+				-- Solarized Light *recommendation*: use the "blue" or "base0" tone
+				-- (Solarized Light has #268bd2 for blue)
+				vim.api.nvim_set_hl(0, "DashboardHeader", { link = "Title" })
+
+				dashboard.section.buttons.val = {
+					dashboard.button("f", "  Find File", "<cmd>Telescope find_files<CR>"),
+					dashboard.button("n", "  New File", "<cmd>enew<CR>"),
+					dashboard.button("g", "  Find Text", "<cmd>Telescope live_grep<CR>"),
+					dashboard.button("r", "  Recent Files", "<cmd>Telescope oldfiles<CR>"),
+					dashboard.button("c", "  Config", "<cmd>edit $MYVIMRC<CR>"),
+					dashboard.button("L", "  Lazy", "<cmd>Lazy<CR>"),
+					dashboard.button("q", "  Quit", "<cmd>qa<CR>"),
+				}
+
+				-- Footer can remain empty
+				dashboard.section.footer.val = ""
+
+				-- Allow autocommands so theme highlights apply properly
+				dashboard.opts.opts.noautocmd = false
+
+				alpha.setup(dashboard.opts)
+
+				-- Ensure colorscheme autocommands run after Alpha is ready
+				vim.api.nvim_create_autocmd("User", {
+					pattern = "AlphaReady",
+					callback = function()
+						vim.cmd("doautocmd ColorScheme")
+					end,
+				})
+			end,
+		},
+
+		-- Theming
+		{ "folke/tokyonight.nvim" }, -- colorscheme
+		{ "nyoom-engineering/oxocarbon.nvim" },
+		{ "ishan9299/nvim-solarized-lua" },
+		{ "sainnhe/gruvbox-material" },
+		{ "ellisonleao/gruvbox.nvim" },
+		{ "zaki/zazen" },
+
+		-- { "bluz71/nvim-linefly" }, -- statusline plugin
+		{ "nvim-lualine/lualine.nvim" },
+		{
+			"echasnovski/mini.indentscope", -- indent guides
+			version = false, -- wait till new 0.7.0 release to put it back on semver
+			event = { "BufReadPre", "BufNewFile" },
+			opts = {
+				-- symbol = "▏",
+				symbol = "│",
+				options = { try_as_border = true },
+			},
+			init = function()
+				api.nvim_create_autocmd("FileType", {
+					pattern = {
+						"help",
+						"dashboard",
+						"lazy",
+						"mason",
+						"notify",
+					},
+					callback = function()
+						vim.b.miniindentscope_disable = true
+					end,
+				})
+			end,
+		},
+
+		-- Fuzzy finder
+		{ "nvim-telescope/telescope.nvim", branch = "0.1.x" }, -- fuzzy finder/file navigator plus more
+		{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" }, -- dependency for better sorting performance
+
+		-- Git
+		{ "lewis6991/gitsigns.nvim" }, -- show git changes in the gutter
+		{ "tpope/vim-fugitive" }, -- git commands in nvim
+
+		-- Code manipulation
+		{ "nvim-treesitter/nvim-treesitter" }, -- syntax highlighting and indentation
+		{ "nvim-treesitter/nvim-treesitter-textobjects" }, -- text objects for treesitter
+		{ "numToStr/Comment.nvim" }, -- comment out lines
+		{
+			"windwp/nvim-autopairs", -- autopairs for treesitter and others
+			event = "InsertEnter",
+			opts = {}, -- this is equalent to setup({}) function
+		},
+
+		{ "nvim-lua/plenary.nvim" }, -- dependency for better sorting performance
+
+		{ "neovim/nvim-lspconfig" }, -- lsp configuration
+		{ "williamboman/mason.nvim" }, -- lsp installer
+		{ "williamboman/mason-lspconfig.nvim" }, -- lsp installer config
+
+		{
+			"nvimtools/none-ls.nvim",
+			dependencies = { "nvim-lua/plenary.nvim" },
+		}, -- auto formatter
+
+		-- Autocomplete
+		{ "hrsh7th/nvim-cmp" }, -- Autocompletion plugin
+		{ "hrsh7th/cmp-buffer" }, -- buffer completions
+		{ "hrsh7th/cmp-path" }, -- path completions
+		{ "saadparwaiz1/cmp_luasnip" }, -- snippet completions
+		{ "hrsh7th/cmp-nvim-lsp" }, -- lsp completions
+
+		-- Snippets
+		{
+			"L3MON4D3/LuaSnip", -- snippet engine
+			dependencies = {
+				"rafamadriz/friendly-snippets", -- a bunch of snippets to use
+				config = function()
+					require("luasnip.loaders.from_vscode").lazy_load()
 				end,
-			})
-		end,
-	},
-
-	-- Fuzzy finder
-	{ "nvim-telescope/telescope.nvim", branch = "0.1.x" }, -- fuzzy finder/file navigator plus more
-	{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" }, -- dependency for better sorting performance
-
-	-- Git
-	{ "lewis6991/gitsigns.nvim" }, -- show git changes in the gutter
-	{ "tpope/vim-fugitive" }, -- git commands in nvim
-
-	-- Code manipulation
-	{ "nvim-treesitter/nvim-treesitter" }, -- syntax highlighting and indentation
-	{ "nvim-treesitter/nvim-treesitter-textobjects" }, -- text objects for treesitter
-	{ "numToStr/Comment.nvim" }, -- comment out lines
-	{
-		"windwp/nvim-autopairs", -- autopairs for treesitter and others
-		event = "InsertEnter",
-		opts = {}, -- this is equalent to setup({}) function
-	},
-
-	{ "nvim-lua/plenary.nvim" }, -- dependency for better sorting performance
-
-	{ "neovim/nvim-lspconfig" }, -- lsp configuration
-	{ "williamboman/mason.nvim" }, -- lsp installer
-	{ "williamboman/mason-lspconfig.nvim" }, -- lsp installer config
-
-	-- Autocomplete
-	{ "hrsh7th/nvim-cmp" }, -- Autocompletion plugin
-	{ "hrsh7th/cmp-buffer" }, -- buffer completions
-	{ "hrsh7th/cmp-path" }, -- path completions
-	{ "saadparwaiz1/cmp_luasnip" }, -- snippet completions
-	{ "hrsh7th/cmp-nvim-lsp" }, -- lsp completions
-
--- Snippets
-{
-  "L3MON4D3/LuaSnip", -- snippet engine
-  dependencies = {
-    "rafamadriz/friendly-snippets", -- a bunch of snippets to use
-    config = function()
-      require("luasnip.loaders.from_vscode").lazy_load()
-    end,
-  },
-  opts = {
-    history = true,
-    delete_check_events = "TextChanged",
-  },
+			},
+			opts = {
+				history = true,
+				delete_check_events = "TextChanged",
+			},
   -- stylua: ignore
   keys = {
     {
@@ -309,28 +322,27 @@ require("lazy").setup({
     { "<tab>", function() require("luasnip").jump(1) end, mode = "s" },
     { "<s-tab>", function() require("luasnip").jump(-1) end, mode = { "i", "s" } },
   },
-	},
-	-- which key
+		},
+		-- which key
 
-	{
-		"folke/which-key.nvim", -- show keybindings in popup
-		event = "VeryLazy",
-		init = function()
-			vim.o.timeout = true
-			vim.o.timeoutlen = 300
-		end,
-		opts = {
-			-- your configuration comes here
-			-- or leave it empty to use the default settings
+		{
+			"folke/which-key.nvim", -- show keybindings in popup
+			event = "VeryLazy",
+			init = function()
+				vim.o.timeout = true
+				vim.o.timeoutlen = 300
+			end,
+			opts = {
+				-- your configuration comes here
+				-- or leave it empty to use the default settings
+			},
 		},
 	},
-
-  },
-  -- Configure any other settings here. See the documentation for more details.
-  -- colorscheme that will be used when installing plugins.
-  install = { colorscheme = { "habamax" } },
-  -- automatically check for plugin updates
-  checker = { enabled = false },
+	-- Configure any other settings here. See the documentation for more details.
+	-- colorscheme that will be used when installing plugins.
+	install = { colorscheme = { "habamax" } },
+	-- automatically check for plugin updates
+	checker = { enabled = false },
 })
 -- ========================================================================== --
 -- ==           {{{       PLUGIN CONFIGURATION                         == --
@@ -340,29 +352,30 @@ require("lazy").setup({
 -- Lualine (Statusline)
 ---
 require("lualine").setup({
-  options = {
-    theme = "gruvbox_light",
-    icons_enabled = true,
-    section_separators = "",
-    component_separators = "",
-  },
+	options = {
+		theme = "gruvbox-material",
+		icons_enabled = true,
+		section_separators = "",
+		component_separators = "",
+	},
 	sections = {
-    lualine_a = {'mode'},
-    lualine_b = {'branch'},
-    lualine_c = { {'filename', path = 4} }, -- shows relative path
-    lualine_x = {'encoding', 'fileformat', 'filetype'},
-    lualine_y = {'progress'},
-    lualine_z = {'location'}
-  },
+		lualine_a = { "mode" },
+		lualine_b = { "branch" },
+		lualine_c = { { "filename", path = 4 } }, -- shows relative path
+		lualine_x = { "encoding", "filetype" },
+		lualine_y = { "progress" },
+		lualine_z = { "location" },
+	},
 })
-
 
 ---
 -- Colorscheme
 ---
-opt.termguicolors = true 
-vim.cmd.colorscheme("solarized") -- set colorscheme
-vim.o.background = "light"
+opt.termguicolors = true
+vim.cmd.colorscheme("gruvbox-material") -- set colorscheme
+--vim.cmd.colorscheme("zazen") -- set colorscheme
+
+--vim.o.background = "dark"
 
 -- vim.o.winbar = "%=%F"
 -- vim.o.winbar = "%F"
@@ -375,6 +388,20 @@ vim.o.background = "light"
 --     vim.api.nvim_set_hl(0, "WinBarNC", { link = "NormalNC" })
 --   end,
 -- })
+
+-- Dynamically set NvimTree background to match current theme
+vim.api.nvim_create_autocmd("ColorScheme", {
+	pattern = "*",
+	callback = function()
+		local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+		local bg = normal_hl.bg and string.format("#%06x", normal_hl.bg) or "NONE"
+
+		vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = bg })
+		vim.api.nvim_set_hl(0, "NvimTreeNormalNC", { bg = bg })
+		vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer", { bg = bg })
+		vim.api.nvim_set_hl(0, "NvimTreeVertSplit", { fg = bg, bg = bg })
+	end,
+})
 
 ---
 -- Treesitter
@@ -406,7 +433,7 @@ require("nvim-treesitter.configs").setup({ -- treesitter configuration
 		"typescript",
 		"tsx",
 		"lua",
-    "luadoc",
+		"luadoc",
 		"vim",
 		"vimdoc",
 		"css",
@@ -441,7 +468,8 @@ require("gitsigns").setup({ -- setup gitsigns
 -- See :help telescope.builtin
 key("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>") -- find recent files
 key("n", "<leader>fb", "<cmd>Telescope buffers<cr>") -- list open buffers
-key("n", "<leader>ff", "<cmd>Telescope find_files<cr>") -- find files
+--key("n", "<leader>ff", "<cmd>Telescope find_files<cr>") -- find files
+key("n", "<leader>ff", "<cmd>Telescope find_files hidden=true no_ignore=true<cr>", { desc = "Find Files (all)" })
 key("n", "<leader>fh", "<cmd>Telescope find_files hidden=true<cr>") -- find hidden files
 key("n", "<leader>fg", "<cmd>Telescope live_grep<cr>") -- find text in files
 key("n", "<leader>sd", "<cmd>Telescope diagnostics bufnr=0<cr>") -- show diagnostics for current buffer
@@ -451,13 +479,13 @@ key("n", "<leader>sk", "<cmd>Telescope keymaps<cr>") -- show keymaps -- this can
 
 require("telescope").load_extension("fzf") -- load fzf
 
-require("telescope").setup({ -- setup telescope
-	defaults = {
-		file_ignore_patterns = {
-			"node_modules",
-			".git",
-		},
-	},
+require("telescope").setup({
+  defaults = {
+    file_ignore_patterns = {
+      "node_modules",
+    },
+    find_command = { "rg", "--files", "--hidden", "--no-ignore" }, 
+  },
 })
 
 require("luasnip.loaders.from_vscode").lazy_load() -- load snippets
@@ -552,14 +580,14 @@ lsp_defaults.capabilities =
 -- Diagnostic customization
 ---
 vim.diagnostic.config({
-  signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = "✘",
-      [vim.diagnostic.severity.WARN] = "▲",
-      [vim.diagnostic.severity.HINT] = "⚑",
-      [vim.diagnostic.severity.INFO] = "»",
-    },
-  },
+	signs = {
+		text = {
+			[vim.diagnostic.severity.ERROR] = "✘",
+			[vim.diagnostic.severity.WARN] = "▲",
+			[vim.diagnostic.severity.HINT] = "⚑",
+			[vim.diagnostic.severity.INFO] = "»",
+		},
+	},
 })
 
 -- See :help vim.diagnostic.config()
@@ -602,6 +630,48 @@ api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
+
+local function get_python_path(workspace)
+  -- 1. Active virtual environment (venv)
+  if vim.env.VIRTUAL_ENV then
+    return vim.env.VIRTUAL_ENV .. "/bin/python"
+  end
+
+  -- 2. Active Conda environment
+  if vim.env.CONDA_PREFIX then
+    return vim.env.CONDA_PREFIX .. "/bin/python"
+  end
+
+  -- 3. Local project `.venv`
+  local venv_path = workspace .. "/.venv/bin/python"
+  if vim.fn.executable(venv_path) == 1 then
+    return venv_path
+  end
+
+  -- 4. System Python fallback
+  return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+end
+
+-- Dynamically set python3_host_prog for Neovim Python plugins
+local function set_python_host_prog()
+  local venv_python = nil
+
+  -- Check if using a virtualenv (venv)
+  if vim.env.VIRTUAL_ENV then
+    venv_python = vim.env.VIRTUAL_ENV .. "/bin/python"
+  -- Check if using conda
+  elseif vim.env.CONDA_PREFIX then
+    venv_python = vim.env.CONDA_PREFIX .. "/bin/python"
+  end
+
+  if venv_python and vim.fn.executable(venv_python) == 1 then
+    vim.g.python3_host_prog = venv_python
+  end
+end
+
+set_python_host_prog()
+
+
 ---
 -- LSP servers
 ---
@@ -634,7 +704,7 @@ require("mason-lspconfig").setup({ -- setup mason-lspconfig
 			lspconfig[server].setup({})
 		end,
 		["tsserver"] = function()
-			lspconfig.ts_ls.setup({
+			lspconfig.tsserver.setup({
 				settings = {
 					completions = {
 						completeFunctionCalls = true,
@@ -642,15 +712,106 @@ require("mason-lspconfig").setup({ -- setup mason-lspconfig
 				},
 			})
 		end,
+
+
+["pyright"] = function()
+  local venv, venv_path
+
+  if vim.env.VIRTUAL_ENV then
+    venv = vim.env.VIRTUAL_ENV:match(".+/([^/]+)$")
+    venv_path = vim.env.VIRTUAL_ENV:match("(.+)/[^/]+$")
+  elseif vim.env.CONDA_PREFIX then
+    venv = vim.env.CONDA_PREFIX:match(".*/envs/([^/]+)$")
+    venv_path = vim.env.CONDA_PREFIX:match("(.+)/envs")
+  end
+
+  require("lspconfig").pyright.setup({
+    settings = {
+      python = {
+        venvPath = venv_path,
+        venv = venv,
+        analysis = {
+          autoSearchPaths = true,
+          diagnosticMode = "openFilesOnly",
+          useLibraryCodeForTypes = true,
+        },
+      },
+    },
+  })
+end
+
+
+
+
+
+
+
+--    ["pyright"] = function()
+--  require("lspconfig").pyright.setup({
+--    before_init = function(_, config)
+--      config.settings = config.settings or {}
+--      config.settings.python = config.settings.python or {}
+--      config.settings.python.pythonPath = get_python_path(config.root_dir)
+--    end,
+--  })
+--end,
+
+--      ["pylsp"] = function()
+--      require("lspconfig").pylsp.setup({
+--        settings = {
+--          pylsp = {
+--            plugins = {
+--              pycodestyle = { enabled = true },
+--              pyflakes = { enabled = true },
+--              pylint = { enabled = false },
+--            },
+--          },
+--        },
+--        cmd_env = {
+--          VIRTUAL_ENV = vim.env.VIRTUAL_ENV,
+--          CONDA_PREFIX = vim.env.CONDA_PREFIX,
+--          PATH = vim.env.VIRTUAL_ENV and vim.env.VIRTUAL_ENV .. "/bin:" .. vim.env.PATH
+--              or vim.env.CONDA_PREFIX and vim.env.CONDA_PREFIX .. "/bin:" .. vim.env.PATH
+--              or vim.env.PATH,
+--        },
+--      })
+--    end,
+
 	},
 })
 
 local nvim_lsp = require("lspconfig") -- setup lspconfig
 
-nvim_lsp.ts_ls.setup({ -- setup tsserver lsp
-	on_attach = on_attach,
-	root_dir = nvim_lsp.util.root_pattern("package.json"), -- use tsserver if package.json is found
-	single_file_support = false,
+local null_ls = require("null-ls")
+
+null_ls.setup({
+  sources = {
+    null_ls.builtins.formatting.prettier,   -- JS/TS/HTML/CSS
+    null_ls.builtins.formatting.black,      -- Python
+    null_ls.builtins.formatting.stylua,     -- Lua
+    null_ls.builtins.formatting.clang_format, -- C/C++/Zig
+  },
+  on_attach = function(client, bufnr)
+
+  end,
+
+  cmd_env = {
+    PATH = (vim.env.VIRTUAL_ENV and vim.env.VIRTUAL_ENV .. "/bin:" .. vim.env.PATH)
+      or (vim.env.CONDA_PREFIX and vim.env.CONDA_PREFIX .. "/bin:" .. vim.env.PATH)
+      or vim.env.PATH,
+  },
 })
+
+vim.keymap.set("n", "<leader>fm", function()
+  vim.lsp.buf.format({ async = true })
+end, { desc = "Format Code" })
+
+
+
+--nvim_lsp.ts_ls.setup({ -- setup tsserver lsp
+--	on_attach = on_attach,
+--	root_dir = nvim_lsp.util.root_pattern("package.json"), -- use tsserver if package.json is found
+--	single_file_support = false,
+--})
 -- }}}
 -- # vim:foldmethod=marker:foldlevel=0
