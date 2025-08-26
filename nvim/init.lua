@@ -43,7 +43,7 @@ key("n", "<leader><space>", ":", { desc = "Command Mode" }) -- command mode
 key("n", "<leader>ec", ":e $MYVIMRC<CR>", { desc = "Edit Config" }) -- edit neovim config file
 key("i", "jk", "<esc>", { desc = "Go to Normal Mode" }) -- go to normal mode
 key("n", "q", "<C-r>", { desc = "Redo" }) -- redo
-key("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle File Explorer" }) --nvim tree
+key("n", "<C-n>", "<cmd>Neotree toggle<CR>", { desc = "Toggle File Explorer" }) -- neo-tree
 
 key({ "n", "x", "o" }, "<leader>h", "^", { desc = "Move to beginning of line" }) -- move to beginning of line
 key({ "n", "x", "o" }, "<leader>l", "g_", { desc = "Move to end of line" }) -- move to end of line
@@ -60,6 +60,9 @@ key("n", "<leader>bq", "<cmd>bdelete<cr>", { desc = "Close buffer" }) -- close b
 key("n", "<leader>bl", "<cmd>buffer #<cr>", { desc = "Next buffer" }) -- go to last buffer
 
 key("n", "<leader>ca", ":lua vim.lsp.buf.code_action()<CR>", { desc = "Code Action" }) -- code action on current line
+
+-- Pokemon dashboard keybindings
+key("n", "<leader>pp", ":PokemonTogglePokedex<CR>", { desc = "Pokemon Info" }) -- show pokemon pokedex
 -- }}}
 -- ========================================================================== --
 -- ==           {{{  COMMANDS                                              == --
@@ -127,112 +130,134 @@ require("lazy").setup({
 		},
 
 		{
-			"nvim-tree/nvim-tree.lua",
+			"nvim-neo-tree/neo-tree.nvim",
+			branch = "v3.x",
 			dependencies = {
+				"nvim-lua/plenary.nvim",
 				"nvim-tree/nvim-web-devicons",
+				"MunifTanjim/nui.nvim",
 			},
 			config = function()
-				require("nvim-tree").setup({
-					view = {
-						width = 35,
-						side = "left",
-					},
-					renderer = {
-						group_empty = true,
-						highlight_git = true,
-						icons = {
-							show = {
-								git = true,
-								folder = true,
-								file = true,
-								folder_arrow = true,
-							},
+				require("neo-tree").setup({
+					close_if_last_window = false,
+					popup_border_style = "rounded",
+					enable_git_status = true,
+					enable_diagnostics = true,
+					git_status_async = true,
+					default_component_configs = {
+						git_status = {
+							symbols = {
+								-- Change type
+								added     = "✚",
+								modified  = "",
+								deleted   = "✖",
+								renamed   = "󰁕",
+								-- Status type
+								untracked = "",
+								ignored   = "",
+								unstaged  = "󰄱",
+								staged    = "",
+								conflict  = "",
+							}
 						},
 					},
-					git = {
-						enable = true,
+					window = {
+						position = "float",
+						width = 50,
+						height = 30,
+						mappings = {
+							-- Git operations
+							["ga"] = "git_add_file",
+							["gu"] = "git_unstage_file",
+							["gr"] = "git_revert_file",
+						},
+					},
+					filesystem = {
+						follow_current_file = {
+							enabled = true,
+						},
+						use_libuv_file_watcher = true,
+						filtered_items = {
+							visible = false,
+							hide_dotfiles = true,
+							hide_gitignored = true,
+							hide_hidden = true,
+							never_show = {
+								".DS_Store",
+								"thumbs.db",
+								".git"
+							},
+						},
+						git_status_async = true,
+					},
+					event_handlers = {
+						{
+							event = "git_status_changed",
+							handler = function(state)
+								vim.schedule(function()
+									require("neo-tree.sources.manager").refresh("filesystem")
+								end)
+							end
+						},
 					},
 				})
 			end,
 		},
 
+		-- Dashboard with snacks.nvim
 		{
-			"goolord/alpha-nvim",
-			dependencies = {
-				"nvim-tree/nvim-web-devicons",
-			},
-
+			"folke/snacks.nvim",
+			priority = 1000,
+			lazy = false,
 			config = function()
-				local alpha = require("alpha")
-				local dashboard = require("alpha.themes.dashboard")
-
-				dashboard.section.header.val = {
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                     ]],
-					[[       ████ ██████           █████      ██                     ]],
-					[[      ███████████             █████                             ]],
-					[[      █████████ ███████████████████ ███   ███████████   ]],
-					[[     █████████  ███    █████████████ █████ ██████████████   ]],
-					[[    █████████ ██████████ █████████ █████ █████ ████ █████   ]],
-					[[  ███████████ ███    ███ █████████ █████ █████ ████ █████  ]],
-					[[ ██████  █████████████████████ ████ █████ █████ ████ ██████ ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-					[[                                                                       ]],
-				}
-
-				-- Apply highlight to the header
-				dashboard.section.header.opts = {
-					position = "center",
-					hl = "DashboardHeader",
-				}
-
-				-- Choose highlight color here:
-				-- Solarized Light *recommendation*: use the "blue" or "base0" tone
-				-- (Solarized Light has #268bd2 for blue)
-				vim.api.nvim_set_hl(0, "DashboardHeader", { link = "Title" })
-
-				dashboard.section.buttons.val = {
-					dashboard.button("f", "  Find File", "<cmd>Telescope find_files<CR>"),
-					dashboard.button("n", "  New File", "<cmd>enew<CR>"),
-					dashboard.button("g", "  Find Text", "<cmd>Telescope live_grep<CR>"),
-					dashboard.button("r", "  Recent Files", "<cmd>Telescope oldfiles<CR>"),
-					dashboard.button("c", "  Config", "<cmd>edit $MYVIMRC<CR>"),
-					dashboard.button("L", "  Lazy", "<cmd>Lazy<CR>"),
-					dashboard.button("q", "  Quit", "<cmd>qa<CR>"),
-				}
-
-				-- Footer can remain empty
-				dashboard.section.footer.val = ""
-
-				-- Allow autocommands so theme highlights apply properly
-				dashboard.opts.opts.noautocmd = false
-
-				alpha.setup(dashboard.opts)
-
-				-- Ensure colorscheme autocommands run after Alpha is ready
-				vim.api.nvim_create_autocmd("User", {
-					pattern = "AlphaReady",
-					callback = function()
-						vim.cmd("doautocmd ColorScheme")
-					end,
+				require("snacks").setup({
+					dashboard = {
+						enabled = true,
+						sections = {
+							{ section = "header" },
+							{
+								section = "keys",
+								gap = 1,
+								padding = 1,
+								keys = {
+									{ icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+									{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+									{ icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+									{ icon = "󰄉 ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+									{ icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+									{ icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
+									{ icon = " ", key = "p", desc = "Pokemon Info", action = ":PokemonTogglePokedex" },
+									{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+								},
+							},
+							{ section = "startup" },
+						},
+					},
 				})
 			end,
 		},
-
+		
+		-- Pokemon ASCII art
+		{
+			"ColaMint/pokemon.nvim",
+			config = function()
+				require("pokemon").setup({
+					number = "random",
+					size = "auto",
+				})
+			end,
+		},
 		-- Theming
+    --{ "tjdevries/colorbuddy.nvim"}, --theme helper
 		{ "folke/tokyonight.nvim" }, -- colorscheme
+    {"Tsuzat/NeoSolarized.nvim"},
+--     {"svrana/neosolarized.nvim"},
 		{ "nyoom-engineering/oxocarbon.nvim" },
 		{ "ishan9299/nvim-solarized-lua" },
 		{ "sainnhe/gruvbox-material" },
 		{ "ellisonleao/gruvbox.nvim" },
 		{ "zaki/zazen" },
+		{ "rose-pine/neovim", name = "rose-pine" }, -- rose pine theme
 
 		-- { "bluz71/nvim-linefly" }, -- statusline plugin
 		{ "nvim-lualine/lualine.nvim" },
@@ -353,8 +378,8 @@ require("lazy").setup({
 ---
 require("lualine").setup({
 	options = {
-		theme = "gruvbox-material",
-		icons_enabled = true,
+		theme = "auto",
+		icons_enabled = false,
 		section_separators = "",
 		component_separators = "",
 	},
@@ -362,7 +387,7 @@ require("lualine").setup({
 		lualine_a = { "mode" },
 		lualine_b = { "branch" },
 		lualine_c = { { "filename", path = 4 } }, -- shows relative path
-		lualine_x = { "encoding", "filetype" },
+		lualine_x = {"" },
 		lualine_y = { "progress" },
 		lualine_z = { "location" },
 	},
@@ -372,8 +397,22 @@ require("lualine").setup({
 -- Colorscheme
 ---
 opt.termguicolors = true
-vim.cmd.colorscheme("gruvbox-material") -- set colorscheme
+--require('rose-pine').setup({
+--  variant = 'moon', -- Use moon variant to match WezTerm
+--})
+--vim.cmd.colorscheme("rose-pine") -- set colorscheme
+vim.cmd.colorscheme("NeoSolarized") -- set colorscheme
+--vim.cmd.colorscheme("gruvbox-material") -- set colorscheme
 --vim.cmd.colorscheme("zazen") -- set colorscheme
+
+-- Alternative: keep true colors but customize Rose Pine to use 256-color equivalents
+-- opt.termguicolors = true
+-- require('rose-pine').setup({
+--   dark_variant = 'main',
+--   disable_background = false,
+--   disable_float_background = false,
+-- })
+-- vim.cmd.colorscheme("rose-pine")
 
 --vim.o.background = "dark"
 
@@ -815,3 +854,4 @@ end, { desc = "Format Code" })
 --})
 -- }}}
 -- # vim:foldmethod=marker:foldlevel=0
+--
