@@ -5,9 +5,9 @@ window-decoration = true
 macos-non-native-fullscreen = true
 cursor-style = block
 
-theme = catppuccin-mocha
-font-family = 0xProto Nerd Font Mono
-font-size = 16
+font-family = JetBrainsMono
+
+#font-size = 12
 font-thicken = true
 
 # new window panes
@@ -22,3 +22,8 @@ keybind = ctrl+s>n=goto_split:next
 
 # closing surfaces
 keybind = ctrl+s>d=close_window
+
+keybind = shift+enter=text:\n
+#theme = "GruvboxDark"
+theme = Solarized Dark - Patched
+

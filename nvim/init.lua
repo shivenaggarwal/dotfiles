@@ -666,6 +666,36 @@ api.nvim_create_autocmd("LspAttach", {
 		bufmap("n", "gl", "<cmd>lua vim.diagnostic.open_float()<cr>") -- show diagnostics
 		bufmap("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>") -- go to previous diagnostic
 		bufmap("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<cr>") -- go to next diagnostic
+		bufmap("n", "<leader>lr", "<cmd>LspRestart<cr>") -- restart LSP
+	end,
+})
+
+-- Auto-activate Python environment and restart LSP 
+api.nvim_create_autocmd({"DirChanged", "VimEnter"}, {
+	group = group,
+	desc = "Auto-activate Python environment and restart LSP",
+	callback = function()
+		local cwd = vim.fn.getcwd()
+		
+		-- Check if we're in a Python project 
+		if vim.fn.filereadable(cwd .. "/pyproject.toml") == 1 or
+		   vim.fn.filereadable(cwd .. "/setup.py") == 1 or
+		   vim.fn.glob(cwd .. "/*.py") ~= "" then
+			
+			-- Check for local .venv and update PATH if it exists
+			local venv_bin = cwd .. "/.venv/bin"
+			if vim.fn.isdirectory(venv_bin) == 1 then
+				local current_path = vim.env.PATH or ""
+				if not string.find(current_path, venv_bin, 1, true) then
+					vim.env.PATH = venv_bin .. ":" .. current_path
+				end
+			end
+			
+			-- Restart LSP
+			vim.defer_fn(function()
+				vim.cmd("silent! LspRestart pyright")
+			end, 100)
+		end
 	end,
 })
 
@@ -681,13 +711,23 @@ local function get_python_path(workspace)
     return vim.env.CONDA_PREFIX .. "/bin/python"
   end
 
-  -- 3. Local project `.venv`
+  -- 3. Local project `.venv` (prioritized for uv projects)
   local venv_path = workspace .. "/.venv/bin/python"
   if vim.fn.executable(venv_path) == 1 then
     return venv_path
   end
 
-  -- 4. System Python fallback
+  -- 4. Check for uv environment using uv python command (for projects without .venv)
+  local handle = io.popen("cd " .. workspace .. " && uv python list 2>/dev/null | grep -E '^\\*' | awk '{print $NF}' 2>/dev/null")
+  if handle then
+    local uv_python = handle:read("*a"):gsub("%s+$", "")
+    handle:close()
+    if uv_python and uv_python ~= "" and vim.fn.executable(uv_python) == 1 then
+      return uv_python
+    end
+  end
+
+  -- 5. System Python fallback
   return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
 end
 
@@ -701,6 +741,14 @@ local function set_python_host_prog()
   -- Check if using conda
   elseif vim.env.CONDA_PREFIX then
     venv_python = vim.env.CONDA_PREFIX .. "/bin/python"
+  else
+    -- Check for uv environment in current directory
+    local cwd = vim.fn.getcwd()
+    venv_python = get_python_path(cwd)
+    -- Only use if it's not system python
+    if venv_python == vim.fn.exepath("python3") or venv_python == vim.fn.exepath("python") or venv_python == "python" then
+      venv_python = nil
+    end
   end
 
   if venv_python and vim.fn.executable(venv_python) == 1 then
@@ -754,24 +802,27 @@ require("mason-lspconfig").setup({ -- setup mason-lspconfig
 
 
 ["pyright"] = function()
-  local venv, venv_path
-
-  if vim.env.VIRTUAL_ENV then
-    venv = vim.env.VIRTUAL_ENV:match(".+/([^/]+)$")
-    venv_path = vim.env.VIRTUAL_ENV:match("(.+)/[^/]+$")
-  elseif vim.env.CONDA_PREFIX then
-    venv = vim.env.CONDA_PREFIX:match(".*/envs/([^/]+)$")
-    venv_path = vim.env.CONDA_PREFIX:match("(.+)/envs")
-  end
-
   require("lspconfig").pyright.setup({
+    on_new_config = function(config, root_dir)
+      local python_path = get_python_path(root_dir)
+      -- Override the command to include the pythonpath argument
+      config.cmd = { "pyright-langserver", "--stdio", "--pythonpath", python_path }
+      config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+        python = {
+          pythonPath = python_path,
+          analysis = {
+            autoSearchPaths = true,
+            diagnosticMode = "workspace", 
+            useLibraryCodeForTypes = true,
+          },
+        }
+      })
+    end,
     settings = {
       python = {
-        venvPath = venv_path,
-        venv = venv,
         analysis = {
           autoSearchPaths = true,
-          diagnosticMode = "openFilesOnly",
+          diagnosticMode = "workspace",
           useLibraryCodeForTypes = true,
         },
       },
