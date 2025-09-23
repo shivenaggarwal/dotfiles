@@ -7,7 +7,7 @@ cursor-style = block
 
 font-family = JetBrainsMono
 
-#font-size = 12
+font-size = 14
 font-thicken = true
 
 # new window panes
@@ -25,5 +25,5 @@ keybind = ctrl+s>d=close_window
 
 keybind = shift+enter=text:\n
 #theme = "GruvboxDark"
-theme = Solarized Dark - Patched
+theme = "bloodmoon.txt"
 
