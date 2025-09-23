@@ -1,4 +1,7 @@
---vim.cmd([[set mouse=]])
+----------------------------
+-- shiven's neovim config --
+----------------------------
+vim.cmd([[set mouse=]])
 vim.cmd([[set noswapfile]])
 vim.opt.winborder = "rounded"
 vim.opt.tabstop = 2
