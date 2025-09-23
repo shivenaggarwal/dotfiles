@@ -22,11 +22,17 @@ vim.pack.add({
 	{ src = 'https://github.com/neovim/nvim-lspconfig' },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/L3MON4D3/LuaSnip" },
+	{ src = "https://github.com/hrsh7th/nvim-cmp" },
+	{ src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
+	{ src = "https://github.com/hrsh7th/cmp-buffer" },
+	{ src = "https://github.com/hrsh7th/cmp-path" },
+	{ src = "https://github.com/saadparwaiz1/cmp_luasnip" },
 })
 
 require "mason".setup()
 require "mini.pick".setup()
 require "mini.bufremove".setup()
+require "mini.pairs".setup()
 require "oil".setup()
 require 'nvim-treesitter.configs'.setup {
 	ensure_installed = {
@@ -42,17 +48,6 @@ require 'nvim-treesitter.configs'.setup {
 	},
 }
 
-vim.api.nvim_create_autocmd('LspAttach', {
-	group = vim.api.nvim_create_augroup('my.lsp', {}),
-	callback = function(args)
-		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-		if client:supports_method('textDocument/completion') then
-			local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-			client.server_capabilities.completionProvider.triggerCharacters = chars
-			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-		end
-	end,
-})
 
 -- LSP
 vim.lsp.enable(
@@ -75,6 +70,50 @@ vim.lsp.enable(
 	}
 )
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
+
+-- nvim-cmp setup for better completion and autoimports
+local cmp = require('cmp')
+local luasnip = require('luasnip')
+
+cmp.setup({
+	snippet = {
+		expand = function(args)
+			luasnip.lsp_expand(args.body)
+		end,
+	},
+	mapping = cmp.mapping.preset.insert({
+		['<C-b>'] = cmp.mapping.scroll_docs(-4),
+		['<C-f>'] = cmp.mapping.scroll_docs(4),
+		['<C-Space>'] = cmp.mapping.complete(),
+		['<C-e>'] = cmp.mapping.abort(),
+		['<CR>'] = cmp.mapping.confirm({ select = true }),
+		['<Tab>'] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_next_item()
+			elseif luasnip.expand_or_jumpable() then
+				luasnip.expand_or_jump()
+			else
+				fallback()
+			end
+		end, { 'i', 's' }),
+		['<S-Tab>'] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_prev_item()
+			elseif luasnip.jumpable(-1) then
+				luasnip.jump(-1)
+			else
+				fallback()
+			end
+		end, { 'i', 's' }),
+	}),
+	sources = cmp.config.sources({
+		{ name = 'nvim_lsp' },
+		{ name = 'luasnip' },
+	}, {
+		{ name = 'buffer' },
+		{ name = 'path' },
+	})
+})
 
 -- colors
 require "vague".setup({ transparent = true })
@@ -115,7 +154,6 @@ map('n', '<leader>f', "<Cmd>Pick files<CR>")
 map('n', '<leader>r', "<Cmd>Pick buffers<CR>")
 map('n', '<leader>h', "<Cmd>Pick help<CR>")
 map('n', '<leader>e', "<Cmd>Oil<CR>")
-map('i', '<c-e>', function() vim.lsp.completion.get() end)
 
 map("n", "<M-n>", "<cmd>resize +2<CR>")          -- Increase height
 map("n", "<M-e>", "<cmd>resize -2<CR>")          -- Decrease height
