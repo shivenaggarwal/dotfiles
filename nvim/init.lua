@@ -149,9 +149,6 @@ map({ 'n', 'v' }, '<leader>c', ':')
 -- soft reload config file
 map({ 'n', 'v' }, '<leader>o', ':update<CR> :source<CR>')
 
-map('t', '', "")
-map('t', '', "")
-
 map('n', '<leader>lf', vim.lsp.buf.format)
 map('n', '<leader>f', "<Cmd>Pick files<CR>")
 map('n', '<leader>r', "<Cmd>Pick buffers<CR>")
@@ -169,6 +166,62 @@ map('n', '[d', vim.diagnostic.goto_prev)
 map('n', ']d', vim.diagnostic.goto_next)
 map('n', '<leader>de', vim.diagnostic.open_float)
 map('n', '<leader>dl', vim.diagnostic.setloclist)
+
+-- Python virtual environment detection
+local function find_python_executable()
+	local cwd = vim.fn.getcwd()
+	
+	-- Check for uv .venv
+	local uv_python = cwd .. "/.venv/bin/python"
+	if vim.fn.executable(uv_python) == 1 then
+		return uv_python
+	end
+	
+	-- Check for conda environment
+	local conda_env = vim.fn.getenv("CONDA_DEFAULT_ENV")
+	if conda_env and conda_env ~= vim.NIL then
+		local conda_python = vim.fn.exepath("python")
+		if conda_python ~= "" then
+			return conda_python
+		end
+	end
+	
+	-- Check for standard .venv
+	local venv_python = cwd .. "/.venv/bin/python"
+	if vim.fn.executable(venv_python) == 1 then
+		return venv_python
+	end
+	
+	-- Check for venv directory
+	local venv_alt_python = cwd .. "/venv/bin/python"
+	if vim.fn.executable(venv_alt_python) == 1 then
+		return venv_alt_python
+	end
+	
+	-- Fall back to system python
+	return vim.fn.exepath("python")
+end
+
+-- Set up Python path for current project
+local function setup_python_path()
+	local python_path = find_python_executable()
+	vim.g.python3_host_prog = python_path
+	
+	-- Update PATH to include the virtual environment
+	local python_dir = vim.fn.fnamemodify(python_path, ":h")
+	local current_path = vim.fn.getenv("PATH")
+	if not string.match(current_path, python_dir) then
+		local new_path = python_dir .. ":" .. current_path
+		vim.fn.setenv("PATH", new_path)
+		-- Also update shell PATH for :! commands
+		vim.env.PATH = new_path
+	end
+end
+
+-- Auto-detect Python environment when entering a directory
+vim.api.nvim_create_autocmd({"VimEnter", "DirChanged"}, {
+	callback = setup_python_path,
+})
 
 -- file type specific build commands
 local filetype_group = vim.api.nvim_create_augroup("filetypes", { clear = true })
