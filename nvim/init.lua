@@ -36,7 +36,21 @@ require "mason".setup()
 require "mini.pick".setup()
 require "mini.bufremove".setup()
 require "mini.pairs".setup()
-require "oil".setup()
+require "oil".setup({
+	view_options = {
+		show_hidden = true,
+	},
+	lsp_file_methods = {
+		enabled = true,
+		timeout_ms = 1000,
+		autosave_changes = true,
+	},
+	float = {
+		max_width = 0.7,
+		max_height = 0.6,
+		border = "rounded",
+	},
+})
 require 'nvim-treesitter.configs'.setup {
 	ensure_installed = {
 		"python", "javascript", "typescript", "tsx", "go",
@@ -129,7 +143,7 @@ vim.g.mapleader = " "
 map('n', '<leader>w', '<Cmd>write<CR>')
 map('n', '<leader>q', require("mini.bufremove").delete)
 map('n', '<leader>Q', '<Cmd>:wqa<CR>')
-map('n', '<C-f>', '<Cmd>Open .<CR>')
+map('n', '<C-f>', '<Cmd>Oil<CR>')
 
 -- open RC files.
 map('n', '<leader>v', '<Cmd>e $MYVIMRC<CR>')
@@ -150,10 +164,13 @@ map({ 'n', 'v' }, '<leader>c', ':')
 map({ 'n', 'v' }, '<leader>o', ':update<CR> :source<CR>')
 
 map('n', '<leader>lf', vim.lsp.buf.format)
+map('n', '<leader>g', "<Cmd>Pick grep_live<CR>")
 map('n', '<leader>f', "<Cmd>Pick files<CR>")
 map('n', '<leader>r', "<Cmd>Pick buffers<CR>")
 map('n', '<leader>h', "<Cmd>Pick help<CR>")
 map('n', '<leader>e', "<Cmd>Oil<CR>")
+map('n', '<leader>E', require("oil").open_float)
+
 
 map("n", "<M-n>", "<cmd>resize +2<CR>")          -- Increase height
 map("n", "<M-e>", "<cmd>resize -2<CR>")          -- Decrease height
@@ -170,13 +187,13 @@ map('n', '<leader>dl', vim.diagnostic.setloclist)
 -- Python virtual environment detection
 local function find_python_executable()
 	local cwd = vim.fn.getcwd()
-	
+
 	-- Check for uv .venv
 	local uv_python = cwd .. "/.venv/bin/python"
 	if vim.fn.executable(uv_python) == 1 then
 		return uv_python
 	end
-	
+
 	-- Check for conda environment
 	local conda_env = vim.fn.getenv("CONDA_DEFAULT_ENV")
 	if conda_env and conda_env ~= vim.NIL then
@@ -185,19 +202,19 @@ local function find_python_executable()
 			return conda_python
 		end
 	end
-	
+
 	-- Check for standard .venv
 	local venv_python = cwd .. "/.venv/bin/python"
 	if vim.fn.executable(venv_python) == 1 then
 		return venv_python
 	end
-	
+
 	-- Check for venv directory
 	local venv_alt_python = cwd .. "/venv/bin/python"
 	if vim.fn.executable(venv_alt_python) == 1 then
 		return venv_alt_python
 	end
-	
+
 	-- Fall back to system python
 	return vim.fn.exepath("python")
 end
@@ -206,7 +223,7 @@ end
 local function setup_python_path()
 	local python_path = find_python_executable()
 	vim.g.python3_host_prog = python_path
-	
+
 	-- Update PATH to include the virtual environment
 	local python_dir = vim.fn.fnamemodify(python_path, ":h")
 	local current_path = vim.fn.getenv("PATH")
@@ -219,7 +236,7 @@ local function setup_python_path()
 end
 
 -- Auto-detect Python environment when entering a directory
-vim.api.nvim_create_autocmd({"VimEnter", "DirChanged"}, {
+vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
 	callback = setup_python_path,
 })
 
@@ -250,3 +267,4 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.opt_local.makeprg = "cargo build"
 	end,
 })
+
