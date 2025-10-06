@@ -1,0 +1,77 @@
+.titlebar-buttonbox-container {
+  display: none !important;
+}
+
+#reload-button,
+#stop-button,
+#home-button,
+#forward-button,
+#back-button,
+#library-button,
+#sidebar-button,
+#nav-bar-overflow-button {
+  display: none !important;
+}
+
+/* no top toolbar at all */
+/*
+#nav-bar {
+  display: none !important;
+}
+*/
+
+#TabsToolbar {
+  min-height: 28px !important;
+}
+
+#tabs-newtab-button {
+  display: none !important;
+}
+
+.tab-close-button {
+  display: none !important;
+}
+
+@-moz-document url("about:home"), url("about:newtab") {
+  .search-wrapper,
+  .logo,
+  .wordmark,
+  .logo-and-wordmark,
+  .search-handoff-button,
+  .logo-section,
+  .logo-container,
+  .hero-text,
+  .contentSearchMain,
+  .search-inner-wrapper,
+  .search-handoff-button.focused,
+  .search-handoff-button {
+    display: none !important;
+  }
+
+  .top-sites,
+  .section,
+  .collapsible-section,
+  .customize-menu,
+  .sponsored,
+  .outer-wrapper .ds-top-sites,
+  .ds-layout {
+    display: none !important;
+  }
+}
+
+
+.titlebar-spacer[type="post-tabs"] {
+  display: block !important;
+  width: 10px !important;  
+}
+
+.titlebar-spacer[type="pre-tabs"] {
+  display: block !important;
+  width: 10px !important;  
+}
+
+#TabsToolbar {
+  padding-left: 0 !important;   
+  margin-left: 0 !important;    
+}
+
