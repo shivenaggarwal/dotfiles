@@ -178,6 +178,10 @@ map("n", "<M-i>", "<cmd>vertical resize +5<CR>") -- Increase width
 map("n", "<M-m>", "<cmd>vertical resize -5<CR>") -- Decrease width
 map("i", "<C-s>", "<c-g>u<Esc>[s1z=`]a<c-g>u")
 
+-- LSP shortcuts
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Go to References" })
+
 -- diagnostic navigation
 map('n', '[d', vim.diagnostic.goto_prev)
 map('n', ']d', vim.diagnostic.goto_next)
