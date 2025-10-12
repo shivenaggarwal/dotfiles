@@ -65,12 +65,11 @@ require 'nvim-treesitter.configs'.setup {
 	},
 }
 
-
 -- LSP
 vim.lsp.enable(
 	{
 		"lua_ls", "svelte", "tinymist",
-		"emmetls", "rust_analyzer", "clangd",
+		"emmet_ls", "rust_analyzer", "clangd",
 		"ruff", "pyright", "ts_ls",
 		"gopls", "tailwindcss", "glsl_analyzer",
 		"haskell-language-server", "hlint",
@@ -132,7 +131,7 @@ local function SetTransparent()
 		"TabLine", "TabLineFill", "TabLineSel",
 		"FoldColumn", "FloatBorder", "CursorColumn",
 		"FloatTitle", "FloatFooter",
-		"Pmenu", "PmenuSbar", "PmenuThumb", 
+		"Pmenu", "PmenuSbar", "PmenuThumb",
 		"MiniPickNormal", "MiniPickBorder", "MiniPickPrompt",
 		"MiniPickHeader", "MiniPickHeaderText",
 		"MiniPickIcon", "MiniPickTitle", "MiniPickPreviewTitle",
