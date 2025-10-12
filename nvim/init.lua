@@ -130,11 +130,11 @@ local function SetTransparent()
 		"SignColumn", "Folded", "VertSplit", "WinSeparator",
 		"EndOfBuffer", "StatusLine", "StatusLineNC",
 		"TabLine", "TabLineFill", "TabLineSel",
-		"FoldColumn", "FloatBorder", "CursorLine", "CursorColumn",
+		"FoldColumn", "FloatBorder", "CursorColumn",
 		"FloatTitle", "FloatFooter",
-		"Pmenu", "PmenuSel", "PmenuSbar", "PmenuThumb",
+		"Pmenu", "PmenuSbar", "PmenuThumb", 
 		"MiniPickNormal", "MiniPickBorder", "MiniPickPrompt",
-		"MiniPickMatchCurrent", "MiniPickHeader", "MiniPickHeaderText",
+		"MiniPickHeader", "MiniPickHeaderText",
 		"MiniPickIcon", "MiniPickTitle", "MiniPickPreviewTitle",
 	}
 	for _, group in ipairs(groups) do
