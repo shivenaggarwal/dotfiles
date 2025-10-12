@@ -171,6 +171,7 @@ map({ 'n', 'v' }, '<leader>c', ':')
 
 -- soft reload config file
 map({ 'n', 'v' }, '<leader>o', ':update<CR> :source<CR>')
+map({ "n", "v", "x" }, "<leader>O", "<Cmd>restart<CR>", { desc = "Restart vim." })
 
 map('n', '<leader>lf', vim.lsp.buf.format)
 map('n', '<leader>g', "<Cmd>Pick grep_live<CR>")
@@ -190,6 +191,7 @@ map("i", "<C-s>", "<c-g>u<Esc>[s1z=`]a<c-g>u")
 -- LSP shortcuts
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
 vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Go to References" })
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
 
 -- diagnostic navigation
 map('n', '[d', vim.diagnostic.goto_prev)
