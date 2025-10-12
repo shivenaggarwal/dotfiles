@@ -17,7 +17,7 @@ vim.opt.undofile = true
 vim.opt.signcolumn = "yes"
 
 vim.pack.add({
-	{ src = "https://github.com/vague2k/vague.nvim" },
+	{ src = "https://github.com/neanias/everforest-nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/echasnovski/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
@@ -122,9 +122,29 @@ cmp.setup({
 })
 
 -- colors
-require "vague".setup({ transparent = true })
-vim.cmd("colorscheme vague")
+vim.o.background = "dark"
+pcall(vim.cmd, "colorscheme everforest")
+local function SetTransparent()
+	local groups = {
+		"Normal", "NormalNC", "NormalFloat",
+		"SignColumn", "Folded", "VertSplit", "WinSeparator",
+		"EndOfBuffer", "StatusLine", "StatusLineNC",
+		"TabLine", "TabLineFill", "TabLineSel",
+		"FoldColumn", "FloatBorder", "CursorLine", "CursorColumn",
+		"FloatTitle", "FloatFooter",
+		"Pmenu", "PmenuSel", "PmenuSbar", "PmenuThumb",
+		"MiniPickNormal", "MiniPickBorder", "MiniPickPrompt",
+		"MiniPickMatchCurrent", "MiniPickHeader", "MiniPickHeaderText",
+		"MiniPickIcon", "MiniPickTitle", "MiniPickPreviewTitle",
+	}
+	for _, group in ipairs(groups) do
+		vim.api.nvim_set_hl(0, group, { bg = "none" })
+	end
+end
+vim.api.nvim_create_autocmd("ColorScheme", { callback = SetTransparent })
+SetTransparent()
 vim.cmd(":hi statusline guibg=NONE")
+
 
 -- mappings
 local map = vim.keymap.set
@@ -184,13 +204,11 @@ map({ "x", "n" }, "<C-s>", [[<esc>:'<,'>s/\V/]],
 local function find_python_executable()
 	local cwd = vim.fn.getcwd()
 
-	-- Check for .venv
 	local venv_python = cwd .. "/.venv/bin/python"
 	if vim.fn.executable(venv_python) == 1 then
 		return venv_python
 	end
 
-	-- Check for conda environment
 	local conda_env = vim.fn.getenv("CONDA_DEFAULT_ENV")
 	if conda_env and conda_env ~= vim.NIL then
 		local conda_python = vim.fn.exepath("python")
@@ -199,7 +217,6 @@ local function find_python_executable()
 		end
 	end
 
-	-- Fall back to system python
 	return vim.fn.exepath("python")
 end
 
@@ -208,18 +225,15 @@ local function setup_python_path()
 	local python_path = find_python_executable()
 	vim.g.python3_host_prog = python_path
 
-	-- Update PATH to include the virtual environment
 	local python_dir = vim.fn.fnamemodify(python_path, ":h")
 	local current_path = vim.fn.getenv("PATH")
 	if not string.match(current_path, python_dir) then
 		local new_path = python_dir .. ":" .. current_path
 		vim.fn.setenv("PATH", new_path)
-		-- Also update shell PATH for :! commands
 		vim.env.PATH = new_path
 	end
 end
 
--- Auto-detect Python environment when entering a directory
 vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
 	callback = setup_python_path,
 })
@@ -251,4 +265,3 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.opt_local.makeprg = "cargo build"
 	end,
 })
-
