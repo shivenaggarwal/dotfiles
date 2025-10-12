@@ -4,6 +4,7 @@ alias la='ls -A'
 alias pog='vim $(fzf-tmux)'
 alias lsa='exa --long'
 alias con="tmux attach-session -t"
+alias code='open -a "Visual Studio Code"'
 
 PROMPT='%F{167}∂%f %B%F{240}%1~ %f%b'
 
@@ -26,3 +27,5 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+# bun completions
+[ -s "/Users/s/.bun/_bun" ] && source "/Users/s/.bun/_bun"

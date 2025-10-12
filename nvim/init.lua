@@ -69,26 +69,15 @@ require 'nvim-treesitter.configs'.setup {
 -- LSP
 vim.lsp.enable(
 	{
-		"lua_ls",
-		"svelte",
-		"tinymist",
-		"emmetls",
-		"rust_analyzer",
-		"clangd",
-		"ruff",
-		"pyright",
-		"ts_ls",
-		"gopls",
-		"tailwindcss",
-		"glsl_analyzer",
-		"haskell-language-server",
-		"hlint",
-
+		"lua_ls", "svelte", "tinymist",
+		"emmetls", "rust_analyzer", "clangd",
+		"ruff", "pyright", "ts_ls",
+		"gopls", "tailwindcss", "glsl_analyzer",
+		"haskell-language-server", "hlint",
 	}
 )
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
 
--- nvim-cmp setup for better completion and autoimports
 local cmp = require('cmp')
 local luasnip = require('luasnip')
 
@@ -143,7 +132,7 @@ vim.g.mapleader = " "
 map('n', '<leader>w', '<Cmd>write<CR>')
 map('n', '<leader>q', require("mini.bufremove").delete)
 map('n', '<leader>Q', '<Cmd>:wqa<CR>')
-map('n', '<C-f>', '<Cmd>Oil<CR>')
+map('n', '<C-f>', '<Cmd>Open .<CR>')
 
 -- open RC files.
 map('n', '<leader>v', '<Cmd>e $MYVIMRC<CR>')
@@ -188,14 +177,17 @@ map('n', ']d', vim.diagnostic.goto_next)
 map('n', '<leader>de', vim.diagnostic.open_float)
 map('n', '<leader>dl', vim.diagnostic.setloclist)
 
+map({ "x", "n" }, "<C-s>", [[<esc>:'<,'>s/\V/]],
+	{ desc = "Enter substitue mode in selection" })
+
 -- Python virtual environment detection
 local function find_python_executable()
 	local cwd = vim.fn.getcwd()
 
-	-- Check for uv .venv
-	local uv_python = cwd .. "/.venv/bin/python"
-	if vim.fn.executable(uv_python) == 1 then
-		return uv_python
+	-- Check for .venv
+	local venv_python = cwd .. "/.venv/bin/python"
+	if vim.fn.executable(venv_python) == 1 then
+		return venv_python
 	end
 
 	-- Check for conda environment
@@ -205,18 +197,6 @@ local function find_python_executable()
 		if conda_python ~= "" then
 			return conda_python
 		end
-	end
-
-	-- Check for standard .venv
-	local venv_python = cwd .. "/.venv/bin/python"
-	if vim.fn.executable(venv_python) == 1 then
-		return venv_python
-	end
-
-	-- Check for venv directory
-	local venv_alt_python = cwd .. "/venv/bin/python"
-	if vim.fn.executable(venv_alt_python) == 1 then
-		return venv_alt_python
 	end
 
 	-- Fall back to system python
