@@ -6,8 +6,9 @@ alias lsa='exa --long'
 alias con="tmux attach-session -t"
 alias code='open -a "Visual Studio Code"'
 
-PROMPT='%F{167}∂%f %B%F{240}%1~ %f%b'
-
+#PROMPT='%F{167}∂%f %B%F{240}%1~ %f%b'
+export CLICOLOR=1
+export PS1=$'%n@%m:\e[0;36m%~\e[0m$ '
 export EDITOR="nvim"
 
 gsl(){ git log --pretty=oneline --abbrev-commit | fzf --preview-window down:70% --preview 'echo {} | cut -f 1 -d " " | xargs git show --color=always'; }
