@@ -14,11 +14,11 @@
   ┌─ ▼ OVERVIEW─────────────────────────────────────────────┐
   │ OS:       macOS                                         │
   │ WM:       aerospace                                     │
-  │ Terminal: ghostty                                       │
+  │ Terminal: kitty                                         │
   │ Shell:    zsh                                           │
-  │ Editors:  neovim                                        │
+  │ Editors:  vim                                           │
   │ Theme:    bloodmoon                                     │
-  │ Font:     jetbrains mono                                │
+  │ Font:     sf mono                                       │
   └─────────────────────────────────────────────────────────┘
 
   ┌─ ▼ FILE STRUCTURE ──────────────────────────────────────┐
@@ -42,8 +42,8 @@
 │ ┌─────────────────────────────────────────────────────────┐ │
 │ │                                                         │ │
 │ │ ALT is reserved for window manager                      │ │
-│ │ CMD is reserved for system shortcuts                    │ │
-│ │ CTL is reserved for apps inside apps                    │ │
+│ │ CMD is reserved for app shortcuts                       │ │
+│ │ CTL is reserved for system shortcuts                    │ │
 │ │                                                         │ │
 │ └─────────────────────────────────────────────────────────┘ │
 │                                                             │

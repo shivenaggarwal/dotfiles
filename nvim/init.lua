@@ -17,7 +17,7 @@ vim.opt.undofile = true
 vim.opt.signcolumn = "yes"
 
 vim.pack.add({
-	{ src = "https://github.com/neanias/everforest-nvim" },
+	{ src = "https://github.com/ellisonleao/gruvbox.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/echasnovski/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
@@ -122,7 +122,7 @@ cmp.setup({
 
 -- colors
 vim.o.background = "dark"
-pcall(vim.cmd, "colorscheme everforest")
+pcall(vim.cmd, "colorscheme gruvbox")
 local function SetTransparent()
 	local groups = {
 		"Normal", "NormalNC", "NormalFloat",
