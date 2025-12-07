@@ -17,7 +17,7 @@ vim.opt.undofile = true
 vim.opt.signcolumn = "yes"
 
 vim.pack.add({
-	{ src = "https://github.com/ellisonleao/gruvbox.nvim" },
+	{ src = "https://github.com/vague2k/vague.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/echasnovski/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
@@ -121,29 +121,9 @@ cmp.setup({
 })
 
 -- colors
-vim.o.background = "dark"
-pcall(vim.cmd, "colorscheme gruvbox")
-local function SetTransparent()
-	local groups = {
-		"Normal", "NormalNC", "NormalFloat",
-		"SignColumn", "Folded", "VertSplit", "WinSeparator",
-		"EndOfBuffer", "StatusLine", "StatusLineNC",
-		"TabLine", "TabLineFill", "TabLineSel",
-		"FoldColumn", "FloatBorder", "CursorColumn",
-		"FloatTitle", "FloatFooter",
-		"Pmenu", "PmenuSbar", "PmenuThumb",
-		"MiniPickNormal", "MiniPickBorder", "MiniPickPrompt",
-		"MiniPickHeader", "MiniPickHeaderText",
-		"MiniPickIcon", "MiniPickTitle", "MiniPickPreviewTitle",
-	}
-	for _, group in ipairs(groups) do
-		vim.api.nvim_set_hl(0, group, { bg = "none" })
-	end
-end
-vim.api.nvim_create_autocmd("ColorScheme", { callback = SetTransparent })
-SetTransparent()
+require "vague".setup({ transparent = true })
+vim.cmd("colorscheme vague")
 vim.cmd(":hi statusline guibg=NONE")
-
 
 -- mappings
 local map = vim.keymap.set
@@ -248,21 +228,5 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.keymap.set("n", "<leader>p", ":TypstPreview<CR>", { buffer = 0 })
 		vim.cmd([[setlocal spell]])
-	end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-	group = filetype_group,
-	pattern = "cpp",
-	callback = function()
-		vim.opt_local.makeprg = "cd build && make"
-	end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-	group = filetype_group,
-	pattern = "rust",
-	callback = function()
-		vim.opt_local.makeprg = "cargo build"
 	end,
 })
