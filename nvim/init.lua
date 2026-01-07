@@ -1,232 +1,320 @@
 ----------------------------
 -- shiven's neovim config --
 ----------------------------
-vim.cmd([[set mouse=]])
-vim.cmd([[set noswapfile]])
-vim.opt.winborder = "rounded"
-vim.opt.tabstop = 2
-vim.opt.wrap = false
-vim.opt.cursorcolumn = false
-vim.opt.ignorecase = true
-vim.opt.shiftwidth = 2
-vim.opt.smartindent = true
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+-- Disable built-ins
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- Editor behavior
+vim.opt.mouse = "a"
+vim.opt.clipboard = "unnamedplus"
+vim.opt.undofile = true
+vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
+vim.opt.updatetime = 100
+vim.opt.confirm = true
+vim.opt.autoread = true
+
+-- UI
+vim.opt.termguicolors = true
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.termguicolors = true
-vim.opt.undofile = true
-vim.opt.signcolumn = "yes"
+vim.opt.signcolumn = "yes:1"
+vim.opt.cursorline = false
+vim.opt.wrap = false
+vim.opt.showmode = false
+vim.opt.showcmd = false
+vim.opt.ruler = true
+vim.opt.pumheight = 10
+vim.opt.fillchars = { eob = " " }
 
-vim.pack.add({
-	{ src = "https://github.com/vague2k/vague.nvim" },
-	{ src = "https://github.com/stevearc/oil.nvim" },
-	{ src = "https://github.com/echasnovski/mini.nvim" },
-	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
-	{ src = "https://github.com/chomosuke/typst-preview.nvim" },
-	{ src = 'https://github.com/neovim/nvim-lspconfig' },
-	{ src = "https://github.com/mason-org/mason.nvim" },
-	{ src = "https://github.com/L3MON4D3/LuaSnip" },
-	{ src = "https://github.com/hrsh7th/nvim-cmp" },
-	{ src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
-	{ src = "https://github.com/hrsh7th/cmp-buffer" },
-	{ src = "https://github.com/hrsh7th/cmp-path" },
-	{ src = "https://github.com/saadparwaiz1/cmp_luasnip" },
+-- Search
+vim.opt.hlsearch = true
+vim.opt.incsearch = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
+-- Indentation
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 2
+vim.opt.smartindent = true
+
+-- Splits
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+
+-- Files
+vim.opt.fileencoding = "utf-8"
+vim.opt.backup = false
+vim.opt.writebackup = false
+vim.opt.swapfile = false
+
+-- Completion
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+-- Filetype detection
+vim.filetype.add({
+    extension = { env = "dotenv" },
+    filename = {
+        [".env"] = "dotenv",
+        [".envrc"] = "sh",
+    },
 })
 
-require "mason".setup()
-require "mini.pick".setup()
-require "mini.bufremove".setup()
-require "mini.pairs".setup()
-require "oil".setup({
-	view_options = {
-		show_hidden = true,
-	},
-	lsp_file_methods = {
-		enabled = true,
-		timeout_ms = 1000,
-		autosave_changes = true,
-	},
-	float = {
-		max_width = 0.7,
-		max_height = 0.6,
-		border = "rounded",
-	},
-})
-require 'nvim-treesitter.configs'.setup {
-	ensure_installed = {
-		"python", "javascript", "typescript", "tsx", "go",
-		"rust", "c", "cpp", "lua", "html", "css", "json"
-	},
-	auto_install = true,
-	highlight = {
-		enable = true,
-	},
-	indent = {
-		enable = true,
-	},
+-- ============================================================================
+-- Plugin
+-- ============================================================================
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.uv.fs_stat(lazypath) then
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+local plugins = {
+  -- LSP
+  {
+    "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "mason-org/mason-lspconfig.nvim" },
+    config = function()
+      local lspconfig = require("lspconfig")
+      local mason_lspconfig = require("mason-lspconfig")
+
+      -- LSP keymaps
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+        callback = function(args)
+          local bufnr = args.buf
+          local function map(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc, silent = true })
+          end
+
+          map("n", "K", vim.lsp.buf.hover, "Hover")
+          map("n", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
+          map("n", "gd", vim.lsp.buf.definition, "Definition")
+          map("n", "gi", vim.lsp.buf.implementation, "Implementation")
+          map("n", "gr", vim.lsp.buf.references, "References")
+          map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
+          map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+          map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
+          map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
+        end,
+      })
+
+      -- Diagnostic config
+      vim.diagnostic.config({
+        virtual_text = true,
+        underline = true,
+        -- float = { border = "rounded" },
+      })
+
+      -- Mason setup
+      mason_lspconfig.setup({
+        handlers = {
+          function(server_name)
+            lspconfig[server_name].setup({})
+          end,
+        },
+      })
+    end,
+  },
+
+  {
+    "mason-org/mason.nvim",
+    lazy = false,
+    config = function()
+      require("mason").setup()
+    end,
+  },
+
+  {
+    "mason-org/mason-lspconfig.nvim",
+    lazy = false,
+    dependencies = { "neovim/nvim-lspconfig" },
+  },
+
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    lazy = false,
+    config = function()
+      require("mason-tool-installer").setup({
+        ensure_installed = { "pyright", "ruff" },
+      })
+    end,
+  },
+
+  -- Completion
+  { "L3MON4D3/LuaSnip" },
+  {
+    "saghen/blink.cmp",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    version = "*",
+    config = function()
+      require("blink.cmp").setup({
+        snippets = { preset = "luasnip" },
+        completion = {
+          -- menu = { border = "rounded" },
+          documentation = { auto_show = true },
+        },
+      })
+    end,
+  },
+
+  -- Treesitter
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    lazy = false,
+    config = function()
+      require("nvim-treesitter").setup({
+        ensure_installed = {
+          "bash", "c", "html", "javascript", "json", "lua",
+          "markdown", "python", "typescript", "vim", "yaml",
+        },
+      })
+    end,
+  },
+
+  -- Mini.nvim
+  {
+    "echasnovski/mini.nvim",
+    config = function()
+      require("mini.ai").setup({ n_lines = 500 })
+      require("mini.surround").setup()
+      require("mini.pairs").setup()
+      require("mini.tabline").setup()
+
+      require("mini.files").setup({
+        windows = {
+          preview = true,
+          width_preview = 50,
+        },
+      })
+      vim.keymap.set("n", "<leader>e", function()
+        require("mini.files").open()
+      end, { desc = "Open mini.files" })
+
+      local statusline = require("mini.statusline")
+      statusline.setup({
+        use_icons = true,
+        set_vim_settings = false,
+      })
+    end,
+  },
+
+  -- FZF (Fuzzy Finder)
+  {
+    "ibhagwan/fzf-lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("fzf-lua").setup({
+        fzf_opts = {
+          ["--layout"] = "default",
+          ["--info"] = "inline-right",
+        },
+        files = {
+          cwd_prompt = false,
+          previewer = "bat",
+        },
+        grep = {
+          previewer = "bat",
+        },
+      })
+
+      local fzf = require("fzf-lua")
+      vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "Find files" })
+      vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "Live grep" })
+      vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "Buffers" })
+      vim.keymap.set("n", "<leader>fh", fzf.help_tags, { desc = "Help tags" })
+    end,
+  },
+
+  -- Colorscheme
+  {
+    "sainnhe/gruvbox-material",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.g.gruvbox_material_background = "hard"
+      vim.g.gruvbox_material_foreground = "mix"
+      vim.cmd("colorscheme gruvbox-material")
+    end,
+  },
 }
 
--- LSP
-vim.lsp.enable(
-	{
-		"lua_ls", "svelte", "tinymist",
-		"emmet_ls", "rust_analyzer", "clangd",
-		"ruff", "pyright", "ts_ls",
-		"gopls", "tailwindcss", "glsl_analyzer",
-		"haskell-language-server", "hlint",
-	}
-)
-vim.cmd [[set completeopt+=menuone,noselect,popup]]
-
-local cmp = require('cmp')
-local luasnip = require('luasnip')
-
-cmp.setup({
-	snippet = {
-		expand = function(args)
-			luasnip.lsp_expand(args.body)
-		end,
-	},
-	mapping = cmp.mapping.preset.insert({
-		['<C-b>'] = cmp.mapping.scroll_docs(-4),
-		['<C-f>'] = cmp.mapping.scroll_docs(4),
-		['<C-Space>'] = cmp.mapping.complete(),
-		['<C-e>'] = cmp.mapping.abort(),
-		['<CR>'] = cmp.mapping.confirm({ select = true }),
-		['<Tab>'] = cmp.mapping(function(fallback)
-			if cmp.visible() then
-				cmp.select_next_item()
-			elseif luasnip.expand_or_jumpable() then
-				luasnip.expand_or_jump()
-			else
-				fallback()
-			end
-		end, { 'i', 's' }),
-		['<S-Tab>'] = cmp.mapping(function(fallback)
-			if cmp.visible() then
-				cmp.select_prev_item()
-			elseif luasnip.jumpable(-1) then
-				luasnip.jump(-1)
-			else
-				fallback()
-			end
-		end, { 'i', 's' }),
-	}),
-	sources = cmp.config.sources({
-		{ name = 'nvim_lsp' },
-		{ name = 'luasnip' },
-	}, {
-		{ name = 'buffer' },
-		{ name = 'path' },
-	})
+require("lazy").setup(plugins, {
+  install = { missing = true, colorscheme = { "gruvbox-material" } },
+  checker = { enabled = true, notify = false },
+  change_detection = { enabled = true, notify = false },
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin",
+      },
+    },
+  },
 })
-
--- colors
-require "vague".setup({ transparent = true })
-vim.cmd("colorscheme vague")
-vim.cmd(":hi statusline guibg=NONE")
-
--- mappings
 local map = vim.keymap.set
-vim.g.mapleader = " "
-map('n', '<leader>w', '<Cmd>write<CR>')
-map('n', '<leader>q', require("mini.bufremove").delete)
-map('n', '<leader>Q', '<Cmd>:wqa<CR>')
-map('n', '<C-f>', '<Cmd>Open .<CR>')
 
--- open RC files.
-map('n', '<leader>v', '<Cmd>e $MYVIMRC<CR>')
-map('n', '<leader>z', '<Cmd>e ~/.config/zsh/.zshrc<CR>')
+-- Basic movement
+map("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true })
+map("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true })
 
--- quickly switch files with alternate / switch it
-map('n', '<leader>s', '<Cmd>e #<CR>')
-map('n', '<leader>S', '<Cmd>bot sf #<CR>')
-map({ 'n', 'v', 'x' }, '<leader>m', ':move ')
-map({ 'n', 'v' }, '<leader>n', ':norm ')
+-- Windows
+map("n", "<leader>w", "<C-w>", { remap = true })
+map("n", "<leader>d", "<C-w>c", { desc = "Close window" })
+map("n", "<leader>s", "<C-w>s", { desc = "Split horizontal" })
+map("n", "<leader>v", "<C-w>v", { desc = "Split vertical" })
 
--- system clipboard
-map({ 'n', 'v' }, '<leader>y', '"+y')
-map({ 'n', 'v' }, '<leader>d', '"+d')
-map({ 'n', 'v' }, '<leader>c', ':')
+-- Buffers
+map("n", "<Tab>", ":bnext<CR>", { silent = true })
+map("n", "<S-Tab>", ":bprev<CR>", { silent = true })
 
--- soft reload config file
-map({ 'n', 'v' }, '<leader>o', ':update<CR> :source<CR>')
-map({ "n", "v", "x" }, "<leader>O", "<Cmd>restart<CR>", { desc = "Restart vim." })
+-- Search
+map("n", "n", "nzzzv")
+map("n", "N", "Nzzzv")
+map("n", "<Esc>", ":nohlsearch<CR>", { silent = true })
 
-map('n', '<leader>lf', vim.lsp.buf.format)
-map('n', '<leader>g', "<Cmd>Pick grep_live<CR>")
-map('n', '<leader>f', "<Cmd>Pick files<CR>")
-map('n', '<leader>r', "<Cmd>Pick buffers<CR>")
-map('n', '<leader>h', "<Cmd>Pick help<CR>")
-map('n', '<leader>e', "<Cmd>Oil<CR>")
-map('n', '<leader>E', require("oil").open_float)
+-- Edit
+map("v", "J", ":m '>+1<CR>gv=gv")
+map("v", "K", ":m '<-2<CR>gv=gv")
+map("i", "jj", "<Esc>")
 
+local api = vim.api
 
-map("n", "<M-n>", "<cmd>resize +2<CR>")          -- Increase height
-map("n", "<M-e>", "<cmd>resize -2<CR>")          -- Decrease height
-map("n", "<M-i>", "<cmd>vertical resize +5<CR>") -- Increase width
-map("n", "<M-m>", "<cmd>vertical resize -5<CR>") -- Decrease width
-map("i", "<C-s>", "<c-g>u<Esc>[s1z=`]a<c-g>u")
-
--- LSP shortcuts
-vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Go to References" })
-vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
-
--- diagnostic navigation
-map('n', '[d', vim.diagnostic.goto_prev)
-map('n', ']d', vim.diagnostic.goto_next)
-map('n', '<leader>de', vim.diagnostic.open_float)
-map('n', '<leader>dl', vim.diagnostic.setloclist)
-
-map({ "x", "n" }, "<C-s>", [[<esc>:'<,'>s/\V/]],
-	{ desc = "Enter substitue mode in selection" })
-
--- Python virtual environment detection
-local function find_python_executable()
-	local cwd = vim.fn.getcwd()
-
-	local venv_python = cwd .. "/.venv/bin/python"
-	if vim.fn.executable(venv_python) == 1 then
-		return venv_python
-	end
-
-	local conda_env = vim.fn.getenv("CONDA_DEFAULT_ENV")
-	if conda_env and conda_env ~= vim.NIL then
-		local conda_python = vim.fn.exepath("python")
-		if conda_python ~= "" then
-			return conda_python
-		end
-	end
-
-	return vim.fn.exepath("python")
-end
-
--- Set up Python path for current project
-local function setup_python_path()
-	local python_path = find_python_executable()
-	vim.g.python3_host_prog = python_path
-
-	local python_dir = vim.fn.fnamemodify(python_path, ":h")
-	local current_path = vim.fn.getenv("PATH")
-	if not string.match(current_path, python_dir) then
-		local new_path = python_dir .. ":" .. current_path
-		vim.fn.setenv("PATH", new_path)
-		vim.env.PATH = new_path
-	end
-end
-
-vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
-	callback = setup_python_path,
+-- Highlight on yank
+api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.hl.on_yank()
+  end,
 })
 
--- file type specific build commands
-local filetype_group = vim.api.nvim_create_augroup("filetypes", { clear = true })
+-- Return to last position
+api.nvim_create_autocmd("BufReadPost", {
+  callback = function()
+    local mark = api.nvim_buf_get_mark(0, '"')
+    if mark[1] > 0 and mark[1] <= api.nvim_buf_line_count(0) then
+      pcall(api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
+})
 
-vim.api.nvim_create_autocmd("FileType", {
-	group = filetype_group,
-	pattern = "typst",
-	callback = function()
-		vim.keymap.set("n", "<leader>p", ":TypstPreview<CR>", { buffer = 0 })
-		vim.cmd([[setlocal spell]])
-	end,
+-- Disable auto-comment
+api.nvim_create_autocmd("BufEnter", {
+  command = "set formatoptions-=cro",
+})
+
+-- Close with q
+api.nvim_create_autocmd("FileType", {
+  pattern = { "help", "lspinfo", "man" },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+  end,
 })
