@@ -275,6 +275,7 @@ map("n", "<leader>v", "<C-w>v", { desc = "Split vertical" })
 -- Buffers
 map("n", "<Tab>", ":bnext<CR>", { silent = true })
 map("n", "<S-Tab>", ":bprev<CR>", { silent = true })
+map("n", "<leader>q", ":bd<CR>", { desc = "Close buffer", silent = true })
 
 -- Search
 map("n", "n", "nzzzv")
