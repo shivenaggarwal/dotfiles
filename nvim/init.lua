@@ -246,6 +246,16 @@ local plugins = {
       vim.cmd("colorscheme gruvbox-material")
     end,
   },
+
+  -- Typst Preview
+  {
+    "chomosuke/typst-preview.nvim",
+    lazy = false,
+    version = "1.*",
+    build = function()
+      require("typst-preview").update()
+    end,
+  },
 }
 
 require("lazy").setup(plugins, {
