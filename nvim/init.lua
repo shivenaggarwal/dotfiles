@@ -221,9 +221,11 @@ local plugins = {
         files = {
           cwd_prompt = false,
           previewer = "bat",
+          cmd = "fd --type f --hidden --follow --exclude .git --exclude node_modules --exclude .next",
         },
         grep = {
           previewer = "bat",
+          cmd = "rg --column --line-number --no-heading --color=always --smart-case -g '!node_modules/' -g '!.next/'",
         },
       })
 
@@ -243,6 +245,7 @@ local plugins = {
     config = function()
       vim.g.gruvbox_material_background = "hard"
       vim.g.gruvbox_material_foreground = "mix"
+      vim.g.gruvbox_material_transparent_background = 1
       vim.cmd("colorscheme gruvbox-material")
     end,
   },
