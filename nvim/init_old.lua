@@ -19,7 +19,6 @@ vim.opt.autoread = true
 
 -- UI
 vim.opt.termguicolors = true
-vim.cmd("colorscheme kitty-default")
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.signcolumn = "yes:1"
@@ -215,7 +214,6 @@ local plugins = {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("fzf-lua").setup({
-        fzf_colors = true,
         fzf_opts = {
           ["--layout"] = "default",
           ["--info"] = "inline-right",
@@ -229,9 +227,6 @@ local plugins = {
           previewer = "bat",
           cmd = "rg --column --line-number --no-heading --color=always --smart-case -g '!node_modules/' -g '!.next/'",
         },
-        previewers = {
-          bat = { theme = "ansi" },
-        },
       })
 
       local fzf = require("fzf-lua")
@@ -239,6 +234,19 @@ local plugins = {
       vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "Live grep" })
       vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "Buffers" })
       vim.keymap.set("n", "<leader>fh", fzf.help_tags, { desc = "Help tags" })
+    end,
+  },
+
+  -- Colorscheme
+  {
+    "sainnhe/gruvbox-material",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.g.gruvbox_material_background = "hard"
+      vim.g.gruvbox_material_foreground = "mix"
+      vim.g.gruvbox_material_transparent_background = 1
+      vim.cmd("colorscheme gruvbox-material")
     end,
   },
 
@@ -254,7 +262,7 @@ local plugins = {
 }
 
 require("lazy").setup(plugins, {
-  install = { missing = true, colorscheme = { "kitty-default" } },
+  install = { missing = true, colorscheme = { "gruvbox-material" } },
   checker = { enabled = true, notify = false },
   change_detection = { enabled = true, notify = false },
   performance = {

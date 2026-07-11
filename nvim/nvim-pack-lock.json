@@ -1,0 +1,27 @@
+{
+  "plugins": {
+    "LuaSnip": [],
+    "cmp-buffer": [],
+    "cmp-nvim-lsp": [],
+    "cmp-path": [],
+    "cmp_luasnip": [],
+    "everforest-nvim": [],
+    "gruvbox.nvim": {
+      "rev": "5e0a460",
+      "src": "https://github.com/ellisonleao/gruvbox.nvim"
+    },
+    "mason.nvim": [],
+    "mini.nvim": [],
+    "nvim-cmp": [],
+    "nvim-lspconfig": [],
+    "nvim-treesitter": {
+      "version": "'main'"
+    },
+    "oil.nvim": [],
+    "typst-preview.nvim": [],
+    "vague.nvim": {
+      "rev": "dba2805",
+      "src": "https://github.com/vague2k/vague.nvim"
+    }
+  }
+}
