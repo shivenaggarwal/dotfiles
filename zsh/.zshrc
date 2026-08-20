@@ -3,6 +3,3 @@ export CLICOLOR=1
 #export PS1=$'%n@%m:\e[0;32m%~\e[0m§ '
 export PS1='%F{white}%n@%m%f:%F{green}%~%f$ '
 export EDITOR='vim'
-
-# Added by Antigravity
-export PATH="/Users/s/.antigravity/antigravity/bin:$PATH"
