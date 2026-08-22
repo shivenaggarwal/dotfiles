@@ -196,6 +196,42 @@ require("lazy").setup({
 		},
 
 		{
+			"norcalli/nvim-colorizer.lua",
+			event = { "BufReadPre", "BufNewFile" },
+			config = function()
+				require("colorizer").setup({
+					"*",
+					css = { rgb_fn = true },
+				})
+			end,
+		},
+
+		{
+			"abecodes/tabout.nvim",
+			event = "InsertCharPre",
+			opts = {
+				tabkey = "<Tab>",
+				backwards_tabkey = "<S-Tab>",
+				act_as_tab = true,
+				act_as_shift_tab = false,
+				default_tab = "<C-t>",
+				default_shift_tab = "<C-d>",
+				enable_backwards = true,
+				completion = false,
+				tabouts = {
+					{ open = "'", close = "'" },
+					{ open = '"', close = '"' },
+					{ open = "`", close = "`" },
+					{ open = "(", close = ")" },
+					{ open = "[", close = "]" },
+					{ open = "{", close = "}" },
+				},
+				ignore_beginning = true,
+				exclude = {},
+			},
+		},
+
+		{
 			"MeanderingProgrammer/render-markdown.nvim",
 			ft = { "markdown" },
 			opts = {},
@@ -281,6 +317,20 @@ require("lazy").setup({
 		},
 
 		{
+			"sphamba/smear-cursor.nvim",
+			opts = {
+				smear_between_buffers = true,
+				smear_between_neighbor_lines = true,
+				scroll_buffer_space = true,
+				legacy_computing_symbols_support = true,
+				smear_insert_mode = true,
+				trailing_stiffness = 0.2,
+				trailing_exponent = 3,
+				gamma = 1,
+			},
+		},
+
+		{
 			"catppuccin/nvim",
 			name = "catppuccin",
 			lazy = true,
@@ -306,20 +356,35 @@ require("lazy").setup({
 
 		{
 			"snacks.nvim",
-			dependencies = { "amansingh-afk/milli.nvim" },
-			opts = function(_, opts)
-				local splash = require("milli").load({ splash = "chrome" })
-				opts.dashboard = vim.tbl_deep_extend("force", opts.dashboard or {}, {
+			opts = {
+				dashboard = {
 					preset = {
-						header = table.concat(splash.frames[1], "\n"),
+						header = table.concat({
+							" ⠀⠀ ⠀⠀⠀⠀⠀⠀⠀⠀⣀⡤⠀⠀⣀⣠⣤⡒⠶⠭⠍⣉⣙⡋⠁⠶⣒⠠⠄⠀⠀⠀⠀⠀⠀⠀⠀ ",
+							"⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⠖⣋⡥⠖⠊⠉⠉⠁⠀⠀⠀⠀⠀⠀⠈⠉⠑⠒⢤⣉⠲⣄⠀⠀⠀⠀⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⠀⠀⠀⡠⣊⠵⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠑⢤⡙⢆⠀⠀⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⠀⣠⢮⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢦⢳⡀⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⡴⡳⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⢱⣳⡀⠀⠀⠀",
+							"⠀⠀⠀⡼⡱⠁⣠⢤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡀⠀⠀⠀⠀⠀⠀⠀⢀⢰⣆⠐⢦⠀⢏⣇⠱⡳⡀⠀⠀",
+							"⠀⢠⡟⡴⠁⠀⠵⠃⠀⠀⠴⠀⠀⠀⣴⠀⠀⡜⠀⢧⠀⠀⠀⠀⠀⢰⡆⠈⠁⠙⠀⠈⢧⠀⠀⠀⢹⢹⠀⠀",
+							"⣠⢋⢢⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⡇⠀⠹⡄⠀⢸⡄⠀⠀⢳⠀⢀⠀⠀⠀⠘⡆⠀⠀⠀⡇⠀⠀",
+							"⠁⠸⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠠⠶⠶⠆⣸⠀⠀⠀⢧⠀⠰⣿⡶⠆⠸⣆⠸⡄⠀⠀⠀⡇⠀⠀⠀⣷⡇⠀",
+							"⠀⡇⡼⡇⠀⠀⠀⠀⡶⠀⠀⠀⣸⡇⠀⠀⣟⠀⠀⠀⠈⢧⠀⢽⢳⡀⠀⢿⣄⡇⠀⠀⠀⣹⠀⠀⠀⠈⠪⣷",
+							"⠀⢹⡇⢳⠀⢀⡀⠀⢹⠀⠀⠀⢸⣇⠀⠀⣗⠀⠀⠀⠀⠈⢧⢸⠀⢳⡀⢹⠘⡇⠀⠀⠀⠹⡆⠀⠀⠀⠀⠀",
+							"⠀⠨⣇⡼⣆⠘⠃⠀⠀⢀⣤⣤⣼⣼⣤⣤⣿⠀⠀⠀⠀⠀⣬⣿⣤⣤⣷⣼⣤⡇⡆⠀⠀⢘⣼⢲⡀⠀⡴⡆",
+							"⠀⢠⡿⢷⠘⣆⡇⠀⠀⢷⡾⠶⣾⡛⠷⠛⠉⠀⠀⠀⠀⠀⠻⣟⣛⣛⡿⢋⡀⡇⡇⠀⠀⢸⠏⠈⡇⡰⠃⠽",
+							"⠀⠀⠀⠀⠙⢯⣷⠔⣪⢽⡃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢱⢳⠃⠀⣀⡾⣆⡤⠋⠁⠀⠛",
+							"⠀⠀⠀⠀⠀⠀⢻⢉⣠⢜⣅⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣿⣿⠟⠉⠀⠈⠁⠐⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⠀⠀⢸⡭⠞⠁⢸⠉⢿⡗⢦⣄⣤⣤⣀⢀⣠⠄⣤⣤⣶⣿⣿⣵⣾⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⠀⠀⢸⢠⣦⠔⠁⠀⠀⠁⣠⣾⣿⡏⢻⣿⡄⣠⠿⣿⠇⢿⣋⣽⠿⢭⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⠀⠀⠈⠛⠀⠀⠀⠀⠀⡴⣁⡀⠈⠳⡟⠈⠙⠃⠀⠈⠳⣏⠁⠀⠀⠀⢳⡀⠀⠀⠀⠀⠀⠀⠀⠀",
+							"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠇⡟⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⣿⠀⢧⠀⠀⠀⠀⠀⠀⠀⠀",
+							"",
+							"Everything is temporary except this feeling",
+						}, "\n"),
 					},
-				})
-				return opts
-			end,
-			config = function(_, opts)
-				require("snacks").setup(opts)
-				require("milli").snacks({ splash = "chrome", loop = true })
-			end,
+				},
+			},
 		},
 	},
 	defaults = {
